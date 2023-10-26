@@ -1,3 +1,6 @@
+This is a fork of ORB_SLAM2 repository, original README is below. The purpose of this fork is to explore ways to extract depth data from monocular camera data in order to improve upon monocular SLAM. This repository will be used for CMU courses 16-811 and 16-833 course projects. 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 # ORB-SLAM2
 **Authors:** [Raul Mur-Artal](http://webdiis.unizar.es/~raulmur/), [Juan D. Tardos](http://webdiis.unizar.es/~jdtardos/), [J. M. M. Montiel](http://webdiis.unizar.es/~josemari/) and [Dorian Galvez-Lopez](http://doriangalvez.com/) ([DBoW2](https://github.com/dorian3d/DBoW2))
 
