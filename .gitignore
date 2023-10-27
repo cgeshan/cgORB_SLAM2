@@ -96,3 +96,5 @@ Vocabulary/ORBvoc.txt
 build/
 *~
 lib/
+output/
+sequences/

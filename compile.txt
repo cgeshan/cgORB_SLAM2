@@ -1,0 +1,7 @@
+# EuRoC Dataset
+
+## to run MH_01_Easy
+	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/MH_01_Easy/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/MH01.txt 
+
+## to run V1_03_Difficult
+	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/V1_03_difficult/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/V103.txt 
