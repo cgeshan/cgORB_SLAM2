@@ -1,18 +1,21 @@
 echo "Configuring and building Thirdparty/DBoW2 ..."
 
 cd Thirdparty/DBoW2
+
+rm -rf build
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake -DCMAKE_CXX_COMPILER=g++ .. -DCMAKE_BUILD_TYPE=Release
 make -j
 
 cd ../../g2o
 
 echo "Configuring and building Thirdparty/g2o ..."
 
+rm -rf build
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake -DCMAKE_CXX_COMPILER=g++ .. -DCMAKE_BUILD_TYPE=Release
 make -j
 
 cd ../../../
@@ -25,7 +28,8 @@ cd ..
 
 echo "Configuring and building ORB_SLAM2 ..."
 
+rm -rf build
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake -DCMAKE_CXX_COMPILER=g++ .. -DCMAKE_BUILD_TYPE=Release
 make -j
