@@ -129,14 +129,12 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime / nImages << endl;
 
     // Save camera trajectory
-    std::string filepath = "./output/mono";
-    std::string path = argv[4];
+    std::string filepath = "./output/mono/";
+    std::string path = argv[3];
     size_t lastSlashPos = path.find_last_of('/');
-    std::string strippedPath = path.substr(lastSlashPos);
-    size_t lastDotPos = strippedPath.find_last_of('.');
-    std::string strippedPathWithoutExtension = strippedPath.substr(0, lastDotPos);
+    std::string extractedPath = path.substr(2, lastSlashPos - 1);
 
-    SLAM.SaveKeyFrameTrajectoryTUM(filepath + strippedPathWithoutExtension);
+    SLAM.SaveKeyFrameTrajectoryTUM(filepath + extractedPath);
 
     return 0;
 }
