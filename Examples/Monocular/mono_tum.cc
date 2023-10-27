@@ -127,7 +127,7 @@ int main(int argc, char **argv)
     std::string filepath = "./output/mono/";
     std::string path = argv[3];
     size_t lastSlashPos = path.find_last_of('/');
-    std::string extractedPath = path.substr(12, lastSlashPos - 2);
+    std::string extractedPath = path.substr(12, lastSlashPos - 12);
 
     SLAM.SaveKeyFrameTrajectoryTUM(filepath + extractedPath);
 
