@@ -23,6 +23,31 @@
 #include <thread>
 #include <pangolin/pangolin.h>
 #include <iomanip>
+#include <sys/stat.h>
+
+bool create_directories(const std::string &path)
+{
+    const int err = mkdir(path.c_str(), 0755); // 0755 sets the permissions for the created directories
+    if (err == 0 || errno == EEXIST)
+    {
+        return true;
+    }
+    else if (errno == ENOENT)
+    {
+        // ENOENT indicates that a parent directory is missing, so try to create it
+        std::size_t found = path.find_last_of("/\\");
+        if (found != std::string::npos)
+        {
+            std::string parent = path.substr(0, found);
+            if (create_directories(parent))
+            {
+
+                return create_directories(path);
+            }
+        }
+    }
+    return false;
+}
 
 namespace ORB_SLAM2
 {
@@ -384,8 +409,10 @@ namespace ORB_SLAM2
 
     void System::SaveKeyFrameTrajectoryTUM(const string &filename)
     {
+        std::string copyStr = filename;
+        copyStr += "/KeyFrameTrajectory.txt";
         cout << endl
-             << "Saving keyframe trajectory to " << filename << " ..." << endl;
+             << "Saving keyframe trajectory to " << copyStr << " ..." << endl;
 
         vector<KeyFrame *> vpKFs = mpMap->GetAllKeyFrames();
         sort(vpKFs.begin(), vpKFs.end(), KeyFrame::lId);
@@ -394,29 +421,40 @@ namespace ORB_SLAM2
         // After a loop closure the first keyframe might not be at the origin.
         // cv::Mat Two = vpKFs[0]->GetPoseInverse();
 
-        ofstream f;
-        f.open(filename.c_str());
-        f << fixed;
-
-        for (size_t i = 0; i < vpKFs.size(); i++)
+        std::string folder = copyStr.substr(0, copyStr.find_last_of("/\\"));
+        if (!create_directories(folder))
         {
-            KeyFrame *pKF = vpKFs[i];
-
-            // pKF->SetPose(pKF->GetPose()*Two);
-
-            if (pKF->isBad())
-                continue;
-
-            cv::Mat R = pKF->GetRotation().t();
-            vector<float> q = Converter::toQuaternion(R);
-            cv::Mat t = pKF->GetCameraCenter();
-            f << setprecision(6) << pKF->mTimeStamp << setprecision(7) << " " << t.at<float>(0) << " " << t.at<float>(1) << " " << t.at<float>(2)
-              << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
+            std::cerr << "Failed to create directories for " << folder << std::endl;
+            cout << endl
+                 << "could not save trajectory..." << endl;
         }
+        else
+        {
 
-        f.close();
-        cout << endl
-             << "trajectory saved!" << endl;
+            ofstream f;
+            f.open(copyStr.c_str());
+            f << fixed;
+
+            for (size_t i = 0; i < vpKFs.size(); i++)
+            {
+                KeyFrame *pKF = vpKFs[i];
+
+                // pKF->SetPose(pKF->GetPose()*Two);
+
+                if (pKF->isBad())
+                    continue;
+
+                cv::Mat R = pKF->GetRotation().t();
+                vector<float> q = Converter::toQuaternion(R);
+                cv::Mat t = pKF->GetCameraCenter();
+                f << setprecision(6) << pKF->mTimeStamp << setprecision(7) << " " << t.at<float>(0) << " " << t.at<float>(1) << " " << t.at<float>(2)
+                  << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
+            }
+
+            f.close();
+            cout << endl
+                 << "trajectory saved!" << endl;
+        }
     }
 
     void System::SaveTrajectoryKITTI(const string &filename)
