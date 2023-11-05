@@ -17,6 +17,10 @@
 ```bash
   sudo apt install build-essential git pkg-config libgtk-3-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libjpeg-dev libpng-dev libtiff-dev gfortran openexr libatlas-base-dev python3-dev python3-numpy libtbb2 libtbb-dev libdc1394-22-dev
 ```
+### Before proceeding, ensure g++ was successfuilly installed by running:
+```bash
+  which g++ && g++ --version
+```
 
 ```bash
   git clone https://github.com/opencv/opencv.git
@@ -125,7 +129,6 @@ Replace line 177 with:
 
 ```code
 // throw std::runtime_error("Pangolin in X11: ...");
-
 ```
 
 - Pangolin/src/CMakeLists.txt
@@ -149,7 +152,7 @@ Replace lines 287-295 with:
 ```bash
   mkdir build && cd build
   cmake build ..
-  cmake --build ..
+  cmake --build .. -DCMAKE_CXX_COMPILER=g++
   sudo make install
 ```
 
