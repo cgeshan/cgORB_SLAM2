@@ -9,6 +9,14 @@ This is a fork of ORB_SLAM2 repository, original README is below. The purpose of
 - Eigen3
 - Pangolin
 
+### Sample Datasets
+
+Please see part 4. of the original README for details on downloading sample datasets. Please create a sequences folder in your local clone for these datasets, they will be ignored when pushing.
+
+```bash
+mkdir sequences
+```
+
 #### Sample compile commands are provided in [compile.txt](https://github.com/cgeshan/cgORB_SLAM2/blob/master/compile.txt)
 
 # ORB-SLAM2
