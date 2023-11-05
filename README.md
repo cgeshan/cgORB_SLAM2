@@ -4,6 +4,11 @@ This is a fork of ORB_SLAM2 repository, original README is below. The purpose of
 
 ### Dependencies
 
+- CMake
+- OpenCV
+- Eigen3
+- Pangolin
+
 #### Sample compile commands are provided in [compile.txt](https://github.com/cgeshan/cgORB_SLAM2/blob/master/compile.txt)
 
 # ORB-SLAM2
