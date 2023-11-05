@@ -1,10 +1,10 @@
 # Specific to this fork
 
-This is a fork of ORB_SLAM2 repository, original README is below. The purpose of this fork is to explore ways to extract depth data from monocular camera data in order to improve upon monocular SLAM. This repository will be used for CMU courses 16-811 and 16-833 course projects. Please install the additional dependencies listed below, and make the necessary changes listed as well. 
+This is a fork of ORB_SLAM2 repository, original README is below. The purpose of this fork is to explore ways to extract depth data from monocular camera data in order to improve upon monocular SLAM. This repository will be used for CMU courses 16-811 and 16-833 course projects. For build instructions please see [install.md](https://github.com/cgeshan/cgORB_SLAM2/blob/master/install.md).
 
+### Dependencies
 
-
-Necessary changes made thanks to [V_SLAMMERS](https://v-slammers.github.io/tools_and_tips/ORB-SLAM2-Install/#3-orb-slam-2)
+#### Sample compile commands are provided in [compile.txt](https://github.com/cgeshan/cgORB_SLAM2/blob/master/compile.txt)
 
 # ORB-SLAM2
 

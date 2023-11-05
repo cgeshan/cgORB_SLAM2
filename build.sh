@@ -6,7 +6,7 @@ rm -rf build
 mkdir build
 cd build
 cmake -DCMAKE_CXX_COMPILER=g++ .. -DCMAKE_BUILD_TYPE=Release
-make -j
+make -j12
 
 cd ../../g2o
 
@@ -16,7 +16,7 @@ rm -rf build
 mkdir build
 cd build
 cmake -DCMAKE_CXX_COMPILER=g++ .. -DCMAKE_BUILD_TYPE=Release
-make -j
+make -j12
 
 cd ../../../
 
@@ -32,4 +32,4 @@ rm -rf build
 mkdir build
 cd build
 cmake -DCMAKE_CXX_COMPILER=g++ .. -DCMAKE_BUILD_TYPE=Release
-make -j
+make -j12
