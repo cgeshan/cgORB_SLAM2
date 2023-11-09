@@ -111,7 +111,8 @@ int main(int argc, char **argv)
         if (ttrack < T)
             usleep((T - ttrack) * 1e6);
     }
-
+    // Pause for screnshot and report purposes
+    cv::waitKey(0);
     // Stop all threads
     SLAM.Shutdown();
 

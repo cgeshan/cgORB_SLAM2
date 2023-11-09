@@ -6,5 +6,23 @@
 ## to run MH_03_medium
 	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/MH_03_medium/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/MH03.txt
 
+## to run MH_05_difficult
+	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/MH_05_difficult/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/MH05.txt
+	
 ## to run V1_03_difficult
 	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/V1_03_difficult/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/V103.txt 
+	
+## to run V2_03_difficult
+	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/V2_03_difficult/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/V203.txt 
+	
+	
+# RGB-D
+
+## to run f1_floor
+	./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg1_room Examples/RGB-D/associations/fr1_room.txt
+	
+## to run f3_office
+	./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM3.yaml sequences/rgbd_dataset_freiburg3_long_office_household Examples/RGB-D/associations/fr3_office.txt
+	
+## to run f3_str_tex_far
+	./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM3.yaml sequences/rgbd_dataset_freiburg3_structure_texture_far Examples/RGB-D/associations/fr3_str_tex_far.txt
