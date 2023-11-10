@@ -1,5 +1,7 @@
 # EuRoC Dataset
 
+# Monocular
+
 ## to run MH_01_easy
 	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/MH_01_easy/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/MH01.txt 
 
@@ -16,13 +18,47 @@
 	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/V2_03_difficult/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/V203.txt 
 	
 	
+# Stereo
+
+## to run MH_01_easy
+	./Examples/Stereo/stereo_euroc Vocabulary/ORBvoc.txt Examples/Stereo/EuRoC.yaml sequences/MH_01_easy/mav0/cam0/data sequences/MH_01_easy/mav0/cam1/data Examples/Stereo/EuRoC_TimeStamps/MH01.txt
+
+## to run MH_03_medium
+	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/MH_03_medium/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/MH03.txt
+
+## to run MH_05_difficult
+	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/MH_05_difficult/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/MH05.txt
+	
+## to run V1_03_difficult
+	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/V1_03_difficult/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/V103.txt 
+	
+## to run V2_03_difficult
+	./Examples/Monocular/mono_euroc Vocabulary/ORBvoc.txt Examples/Monocular/EuRoC.yaml ./sequences/V2_03_difficult/mav0/cam0/data Examples/Monocular/EuRoC_TimeStamps/V203.txt 
+ 
+
 # RGB-D
 
-## to run f1_floor
+## to run fr1_desk
+	./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg1_desk Examples/RGB-D/associations/fr1_desk.txt
+
+## to run fr1_desk2
+	./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg1_desk2 Examples/RGB-D/associations/fr1_desk2.txt
+
+## to run fr1_room
 	./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg1_room Examples/RGB-D/associations/fr1_room.txt
-	
-## to run f3_office
+
+## to run fr2_desk
+	./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg2_desk Examples/RGB-D/associations/fr2_desk.txt
+
+## to run fr2_xyz
+	./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg2_xyz Examples/RGB-D/associations/fr2_xyz.txt
+
+## to run fr3_office
 	./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM3.yaml sequences/rgbd_dataset_freiburg3_long_office_household Examples/RGB-D/associations/fr3_office.txt
-	
-## to run f3_str_tex_far
+
+## to run fr3_str_tex_far
 	./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM3.yaml sequences/rgbd_dataset_freiburg3_structure_texture_far Examples/RGB-D/associations/fr3_str_tex_far.txt
+	
+
+# Run ALL RGB-D
+./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg1_desk Examples/RGB-D/associations/fr1_desk.txt; ./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg1_desk2 Examples/RGB-D/associations/fr1_desk2.txt; ./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg1_room Examples/RGB-D/associations/fr1_room.txt; ./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg2_desk Examples/RGB-D/associations/fr2_desk.txt; ./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM1.yaml sequences/rgbd_dataset_freiburg2_xyz Examples/RGB-D/associations/fr2_xyz.txt; ./Examples/RGB-D/rgbd_tum Vocabulary/ORBvoc.txt Examples/RGB-D/TUM3.yaml sequences/rgbd_dataset_freiburg3_long_office_household Examples/RGB-D/associations/fr3_office.txt

@@ -123,8 +123,8 @@ int main(int argc, char **argv)
             usleep((T - ttrack) * 1e6);
     }
 
-    // Pause for screenshot and report purposes
-    cv::waitKey(0);
+    // // Pause for screenshot and report purposes
+    // cv::waitKey(0);
     // Stop all threads
     SLAM.Shutdown();
 
@@ -141,8 +141,13 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime / nImages << endl;
 
     // Save camera trajectory
-    SLAM.SaveTrajectoryTUM("output/RGB_D/CameraTrajectory.txt");
-    SLAM.SaveKeyFrameTrajectoryTUM("output/RGB_D/KeyFrameTrajectory.txt");
+    std::string filepath = "./output/RGB_D/";
+    std::string path = argv[3];
+    size_t lastSlashPos = path.find_last_of('/');
+    std::string extractedPath = path.substr(12, lastSlashPos - 12);
+
+    SLAM.SaveTrajectoryTUM(filepath + extractedPath);
+    SLAM.SaveKeyFrameTrajectoryTUM(filepath + extractedPath);
 
     return 0;
 }

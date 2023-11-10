@@ -129,7 +129,7 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime / nImages << endl;
 
     // Save camera trajectory
-    std::string filepath = "./output/mono/";
+    std::string filepath = "./output/stereo/";
     std::string path = argv[3];
     size_t lastSlashPos = path.find_last_of('/');
     std::string extractedPath = path.substr(12, lastSlashPos - 12);
