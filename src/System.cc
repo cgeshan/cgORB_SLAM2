@@ -375,6 +375,12 @@ namespace ORB_SLAM2
 
             ofstream f;
             f.open(filename.c_str());
+            if (f.is_open())
+            {
+                std::cout << "Opened file " << std::endl;
+            }
+            cv::waitKey(0);
+
             f << fixed;
 
             // Frame pose is stored relative to its reference keyframe (which is optimized by BA and pose graph).
@@ -414,6 +420,7 @@ namespace ORB_SLAM2
 
                 f << setprecision(6) << *lT << " " << setprecision(9) << twc.at<float>(0) << " " << twc.at<float>(1) << " " << twc.at<float>(2) << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
             }
+            cv::waitKey(0);
             f.close();
             cout << endl
                  << "trajectory saved!" << endl;

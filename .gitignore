@@ -14,8 +14,6 @@
 # Build files #
 ###############
 build/
-matplotplusplus/
-test/
 
 # VS Code generated files #
 ###########################
@@ -74,27 +72,12 @@ __pycache__/
 # Specific ORB_SLAM2 Files #
 ############################
 CMakeLists.txt.user
-Examples/Monocular/mono_euroc
-Examples/Monocular/mono_kitti
-Examples/Monocular/mono_tum
-Examples/RGB-D/rgbd_tum
-Examples/ROS/ORB_SLAM2/CMakeLists.txt.user
-Examples/ROS/ORB_SLAM2/Mono
-Examples/ROS/ORB_SLAM2/MonoAR
-Examples/ROS/ORB_SLAM2/RGBD
-Examples/ROS/ORB_SLAM2/Stereo
-Examples/ROS/ORB_SLAM2/build/
-Examples/Stereo/stereo_euroc
-Examples/Stereo/stereo_kitti
+Examples/
 KeyFrameTrajectory.txt
-Thirdparty/DBoW2/build/
-Thirdparty/DBoW2/lib/
-Thirdparty/g2o/build/
-Thirdparty/g2o/config.h
-Thirdparty/g2o/lib/
-Vocabulary/ORBvoc.txt
-build/
+Thirdparty/
+Vocabulary/
 *~
 lib/
 output/
 sequences/
+images/
