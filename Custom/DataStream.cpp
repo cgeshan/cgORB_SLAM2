@@ -4,6 +4,13 @@ DataStream::DataStream()
 {
     this->filename = nullptr;
     this->permission = 0644;
+    this->terminate = false;
+}
+
+DataStream::DataStream(const char *path, mode_t mode)
+{
+    this->filename = path;
+    this->permission = mode;
 }
 
 DataStream::~DataStream()
@@ -24,14 +31,13 @@ DataStream::~DataStream()
     }
 }
 
-bool DataStream::Init(const char *path, mode_t mode)
+bool DataStream::Init()
 {
-    this->filename = path;
-    this->permission = mode;
 
     if (mkfifo(filename, permission) == 0)
     {
         std::cout << "## Data stream created..." << std::endl;
+        this->terminate = false;
         return true;
     }
     else
@@ -65,7 +71,7 @@ std::string DataStream::GetFileName()
 
 int DataStream::OpenReadOnly()
 {
-    fileDescriptor = open(filename, O_NONBLOCK, O_RDONLY);
+    fileDescriptor = open(filename, O_RDONLY);
     if (fileDescriptor == -1)
     {
         std::cerr << "*** ERROR *** Error opening the named pipe for reading." << std::endl;

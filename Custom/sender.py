@@ -1,25 +1,33 @@
+from PIL import Image
 import numpy as np
-import random
-from time import sleep
-import os.path
 import os
 import time
 
-pipe_name = "data_stream"
 
-if os.path.exists(pipe_name):
-    pipe_fd = os.open(pipe_name, os.O_WRONLY)
-    print(f"File Descriptor: {pipe_fd}")
+# Create a named pipe (FIFO) if it doesn't exist
+fifo_path = "Custom/data_stream"
+if not os.path.exists(fifo_path):
+    os.mkfifo(fifo_path)
 
-    for _ in range(4):
-        feed = []
-        for _ in range(4):
-            feed.append(random.randint(0, 255))
+with open(fifo_path, "wb") as fifo:
+    for _ in range(30):
+        img = Image.open(
+            "/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/Custom/ground_truth.png"
+        )
 
-        os.write(pipe_fd, bytes(" ".join(map(str, feed)), "utf-8"))
-        print(f"Sent: {feed}")
+        rgb_arr = np.array(img)
+        fifo.write(rgb_arr.tobytes())
+        print("GT Sent")
+        # time.sleep(2)
 
-        time.sleep(1)
+        img2 = Image.open("/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/Custom/pred.png")
 
-    os.write(pipe_fd, bytes("".join(map(str, "terminate")), "utf-8"))
-    os.close(pipe_fd)
+        rgb_arr2 = np.array(img2)
+        fifo.write(rgb_arr2.tobytes())
+        print("Pred Sent")
+
+    terminate_signal = "terminate"
+    fifo.write(terminate_signal.encode("utf-8"))
+    print("terminate sent")
+
+    fifo.close()

@@ -1,46 +1,35 @@
-#include <iostream>
-#include <stdio.h>
 #include <algorithm>
-#include <fstream>
 #include <chrono>
+#include <limits.h>
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/opencv.hpp>
 
 // #include <System.h>
 
 #include "DataStream.h"
+#include "PNGHandler.h"
 
-std::vector<float> ExtractRGBD(std::vector<float> &data, const char *buffer)
-{
-    std::string received(buffer);
-    std::istringstream ss(received);
-    while (std::getline(ss, received, ' ') && strcmp(buffer, "terminate") != 0)
-    {
-        data.push_back(std::stof(received));
-    }
-    return data;
-}
+/**
+ * Rather than use a state machine, continue reading from buffer until image.GetSize() is reached.
+ * Then save image, clear image.dat, and repeat.
+ *
+ * Change state machine into terminate boolean.
+ */
 
-void PrintRGBD(std::vector<float> data)
-{
-    for (int idx = 0; idx < data.size(); idx += 4)
-    {
-        float r = data[idx];
-        float g = data[idx + 1];
-        float b = data[idx + 2];
-        float d = data[idx + 3];
-        std::cout << "R: " << r << " G: " << g << " B: " << b << " D: " << d << std::endl;
-    }
-}
-
-int main()
+int main(int argc, char **argv)
 {
     DataStream stream;
-    std::vector<float> data;
+    stream.SetFileName("Custom/data_stream");
+    stream.SetPermission(0666);
 
-    if (!stream.Init("data_stream", 0666))
+    PNGHandler image;
+    image.SetResolution(224, 224, 3);
+    std::string pngFileName;
+
+    if (!stream.Init())
     {
-        std::cout << "Terminating" << std::endl;
+        std::cout << "*** ERROR *** Terminating program, pipe initialization failed." << std::endl;
         return 1;
     }
 
@@ -52,27 +41,58 @@ int main()
         return 1;
     }
 
-    while (true)
-    {
-        char buffer[100];
-        ssize_t bytes_read = read(stream.fileDescriptor, buffer, sizeof(buffer));
+    std::vector<char> buffer;
+    char tempBuffer[PIPE_BUF];
 
-        if (bytes_read > 0)
+    size_t desiredBytes = image.GetSize();
+    size_t bytesRead;
+    int i = 0;
+
+    while (!stream.terminate)
+    {
+        bytesRead = read(stream.fileDescriptor, tempBuffer, std::min(desiredBytes, static_cast<size_t>(PIPE_BUF)));
+        buffer.insert(buffer.end(), tempBuffer, tempBuffer + bytesRead);
+        desiredBytes -= bytesRead;
+
+        if (0 == desiredBytes)
         {
-            buffer[bytes_read] = '\0';
-            std::cout << "Received: " << buffer << std::endl;
-            ExtractRGBD(data, buffer);
+            // std::cout << "Image size from buffer: " << buffer.size() << ", Desired image resoltion: " << image.GetSize() << std::endl;
+            std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
+            std::time_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+            if (i == 0)
+            {
+                pngFileName = "Custom/depth/" + std::to_string(timestamp) + ".png";
+                ++i;
+            }
+            else if (i == 1)
+            {
+                pngFileName = "Custom/rgb/" + std::to_string(timestamp) + ".png";
+                --i;
+            }
+
+            image.SetData(buffer);
+            image.Save(pngFileName);
+            buffer.clear();
+            desiredBytes = image.GetSize();
         }
 
-        if (strcmp(buffer, "terminate") == 0)
+        std::string bytesStr(tempBuffer, bytesRead);
+
+        if ("terminate" == bytesStr)
         {
+            stream.terminate = true;
+            std::cout << "## Terminate command received, closing pipe and exiting data stream loop..." << std::endl;
             break;
         }
     }
 
     stream.Close();
 
-    PrintRGBD(data);
-
     return 0;
 }
+
+/**
+ * Get the camera resolution from the yaml settings file.
+ * cv::FileStorage fSettings(argv[2], cv::FileStorage::READ);
+ * image.SetResolution(fSettings["Camera.width"], fSettings["Camera.height"], fSettings["Camera.channels"]);
+ */

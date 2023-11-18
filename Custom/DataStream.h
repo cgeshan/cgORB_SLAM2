@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <cstring>
-#include <stdexcept>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -17,8 +16,9 @@ private:
 
 public:
     DataStream();
+    DataStream(const char *filename, mode_t mode);
     ~DataStream();
-    bool Init(const char *filename, mode_t mode);
+    bool Init();
     void SetFileName(const char *filename);
     void SetPermission(const mode_t mode);
     std::string GetFileName();
@@ -28,6 +28,7 @@ public:
     void Close();
 
     int fileDescriptor;
+    bool terminate;
 };
 
 #endif

@@ -112,6 +112,9 @@ Examples/Monocular/mono_euroc.cc)
 target_link_libraries(mono_euroc ${PROJECT_NAME})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Custom)
-add_executable(Custom Custom/Custom.cpp Custom/DataStream.cpp)
+
+file(GLOB_RECURSE SRC "Custom/*.cpp")
+file(GLOB_RECURSE HDRS "Custom/*.h")
+add_executable(Custom ${SRC} ${HDRS})
 target_link_libraries(Custom ${PROJECT_NAME})
 
