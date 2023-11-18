@@ -10,7 +10,7 @@ if not os.path.exists(fifo_path):
     os.mkfifo(fifo_path)
 
 with open(fifo_path, "wb") as fifo:
-    for _ in range(30):
+    for _ in range(3):
         img = Image.open(
             "/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/Custom/ground_truth.png"
         )

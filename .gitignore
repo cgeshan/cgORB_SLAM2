@@ -81,3 +81,4 @@ lib/
 output/
 sequences/
 images/
+*.png
