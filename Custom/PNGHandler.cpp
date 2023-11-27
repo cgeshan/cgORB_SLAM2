@@ -6,6 +6,7 @@ PNGHandler::PNGHandler()
     this->height = 0;
     this->channels = 0;
     this->filename = "PNGHandler_Output.png";
+    this->dat.resize(width * height * channels);
 }
 PNGHandler::PNGHandler(const int wid, const int hei, const int channels)
 {
@@ -13,6 +14,7 @@ PNGHandler::PNGHandler(const int wid, const int hei, const int channels)
     this->height = hei;
     this->channels = channels;
     this->filename = "PNGHandler_Output.png";
+    this->dat.resize(wid * hei * channels);
 }
 
 PNGHandler::~PNGHandler()
@@ -22,16 +24,15 @@ PNGHandler::~PNGHandler()
 
 void PNGHandler::CleanUp()
 {
-    if (nullptr != img)
-    {
-        delete[] img;
-    }
-    img = nullptr;
+    this->width = 0;
+    this->height = 0;
+    this->channels = 0;
+    this->dat.clear();
 }
 
 void PNGHandler::SetResolution(const int wid, const int hei, const int channels)
 {
-    if (1 > wid || 1 > hei || 1 > channels)
+    if (wid < 1 || hei < 1)
     {
         throw std::invalid_argument("*** Error *** Image width and height must be greater than 0 pixel.");
     }
@@ -39,22 +40,15 @@ void PNGHandler::SetResolution(const int wid, const int hei, const int channels)
     this->width = wid;
     this->height = hei;
     this->channels = channels;
+    this->dat.resize(wid * hei * channels);
 }
 
-void PNGHandler::SetImageMatrix(const std::vector<char> &buffer)
+void PNGHandler::SetData(const std::vector<char> &buffer)
 {
-    if (!buffer.empty())
+    if (this->dat != buffer)
     {
-        if (nullptr != this->img)
-        {
-            CleanUp();
-        }
-        this->img = new Mat(this->width, this->height, CV_8UC3);
-        std::memcpy(img.data, buffer.data(), buffer.size());
-    }
-    else
-    {
-        throw std::invalid_argument("*** Error *** Unable to set image from buffer, buffer was empty...");
+        this->dat.clear();
+        this->dat = buffer;
     }
 }
 
@@ -68,28 +62,39 @@ void PNGHandler::SetFilename(const std::string &fn)
 
 int PNGHandler::GetSize(void) const
 {
-    return this->width * this->height * this->channels;
+    return this->dat.size();
 }
 
-bool PNGHandler::Save() const
+bool PNGHandler::Save()
 {
-    if (0 < this->width && 0 < this->height && 0 < this->channels)
+    if (this->width > 0 && this->height > 0)
     {
-        if (nullptr != this->img)
-        {
-            // Convert RGB to BGR
-            cv::Mat bgrImage;
-            cv::cvtColor(this->img, bgrImage, cv::COLOR_RGB2BGR);
+        cv::Mat image(this->width, this->height, CV_8UC3);
+        std::memcpy(image.data, dat.data(), dat.size());
 
-            cv::imwrite(this->filename, bgrImage);
+        // Convert RGB to BGR
+        cv::Mat bgrImage;
+        cv::cvtColor(image, bgrImage, cv::COLOR_RGB2BGR);
 
-            std::cout << "Image saved with filename: " << this->filename << std::endl;
-            return true;
-        }
+        cv::imwrite(this->filename, bgrImage);
+
+        std::cout << "Image saved with filename: " << this->filename << std::endl;
+        return true;
     }
     else
     {
         throw std::invalid_argument("*** Error *** Image resolution must be greater than 1x1 pixel. Current image resolution is " + std::to_string(this->width) + " x " + std::to_string(this->height) + ". You can change the image resolution by calling SetResolution()");
         return false;
+    }
+}
+
+void PNGHandler::Print()
+{
+    for (int i = 0; i < dat.size(); i += 3)
+    {
+        float r = dat[i];
+        float g = dat[i + 1];
+        float b = dat[i + 2];
+        std::cout << "R: " << r << " G: " << g << " B: " << b << std::endl;
     }
 }
