@@ -17,9 +17,9 @@ enum ImageType
 class PNGHandler
 {
 private:
-    int width, height, channels;
-    std::vector<char> dat;
-    std::string filename;
+    int width = 0, height = 0, channels = 0;
+    cv::Mat *img = nullptr;
+    std::string filename = "";
 
 public:
     PNGHandler();
@@ -27,11 +27,10 @@ public:
     ~PNGHandler();
     void CleanUp();
     void SetResolution(const int wid, const int hei, const int channels);
-    void SetData(const std::vector<char> &buffer);
+    void SetImageMatrix(const std::vector<char> &buffer);
     void SetFilename(const std::string &fn);
     int GetSize(void) const;
-    bool Save();
-    void Print();
+    bool Save() const;
 
     ImageType type;
 };
