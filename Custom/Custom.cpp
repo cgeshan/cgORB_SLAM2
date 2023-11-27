@@ -4,7 +4,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
 
-// #include <System.h>
+#include <System.h>
 
 #include "DataStream.h"
 #include "PNGHandler.h"
@@ -15,9 +15,11 @@ int main(int argc, char **argv)
     stream.SetFileName("Custom/data_stream");
     stream.SetPermission(0666);
 
-    PNGHandler image;
-    image.SetResolution(224, 224, 3);
-    image.type = DEPTH_IMAGE;
+    PNGHandler imgRGB, imgDepth;
+    imgRGB.SetResolution(224, 224, 3);
+    imgDepth.SetResolution(224, 224, 3);
+
+    ORB_SLAM2::System SLAM(argv[1], argtv[2], ORB_SLAM2::System::RGBD, true);
 
     if (!stream.Init())
     {
@@ -33,38 +35,64 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // Buffer reading
     std::vector<char> buffer;
     size_t desiredBytes = image.GetSize();
+    size_t totalBytes = desiredBytes * 2;
     char tempBuffer[desiredBytes];
-
     size_t bytesRead;
+
+    // Timing
+    std::vector<float> vElapsedTime;
 
     while (!stream.terminate)
     {
-        bytesRead = read(stream.fileDescriptor, tempBuffer, desiredBytes);
+        bytesRead = read(stream.fileDescriptor, tempBuffer, totalBytes);
         buffer.insert(buffer.end(), tempBuffer, tempBuffer + bytesRead);
-        desiredBytes -= bytesRead;
+        totalBytes -= bytesRead;
 
-        if (0 == desiredBytes)
+        if (0 == totalBytes)
         {
-            // std::cout << "Image size from buffer: " << buffer.size() << ", Desired image resoltion: " << image.GetSize() << std::endl;
             std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
             std::time_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
-            if (DEPTH_IMAGE == image.type)
-            {
-                image.SetFilename("Custom/depth/" + std::to_string(timestamp) + ".png");
-                image.type = RGB_IMAGE;
-            }
-            else if (RGB_IMAGE == image.type)
-            {
-                image.SetFilename("Custom/rgb/" + std::to_string(timestamp) + ".png");
-                image.type = DEPTH_IMAGE;
-            }
 
-            image.SetData(buffer);
-            image.Save();
+            std::cout << "\n## First pair of images received..." << std::endl;
+
+            // Split the bytes into respective images
+            std::cout << "## Splitting buffer into RGB and Depth images..." << std::endl;
+            std::vector<char> bufferRGB, bufferDepth;
+            bufferRGB.insert(bufferRGB.begin(), tempBuffer, tempBuffer + desiredBytes);
+            bufferDepth.insert(bufferDepth.begin(), tempBuffer + desiredBytes + 1, tempBuffer + bytesRead);
+
+            // Assign buffer to image matrices
+            imgRGB.SetImageMatrix(bufferRGB);
+            imgDepth.SetImageMatrix(bufferDepth);
+
+// Run ORB-SLAM2 Track RGB-D
+#ifdef COMPILEDWITHC11
+            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+#else
+            std::chrono::monotonic_clock::time_point t1 = std::chrono::monotonic_clock::now();
+#endif
+
+            // Pass the image to the SLAM system
+            SLAM.TrackRGBD(imgRGB, imgDepth, static_cast<double> timestamp);
+
+#ifdef COMPILEDWITHC11
+            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+#else
+            std::chrono::monotonic_clock::time_point t2 = std::chrono::monotonic_clock::now();
+#endif
+
+            // Clear all buffers
             buffer.clear();
-            desiredBytes = image.GetSize();
+            bufferRGB.clear();
+            bufferDepth.clear();
+
+            totalBytes = desiredBytes * 2;
+
+            double elapsedTime = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
+            vElapsedTime.push_back(elapsedTime);
         }
 
         std::string bytesStr(tempBuffer, bytesRead);
@@ -76,8 +104,20 @@ int main(int argc, char **argv)
             break;
         }
     }
-
+    SLAM.Shutdown();
     stream.Close();
+
+    float totalElapsedTime = std::accumulate(vElapsedTime.begin(), vElapsedTime.end(), 0);
+    std::cout << "\n## Median Tracking Time: " << vElapsedTime[vElapsedTime.size() / 2] << std::endl;
+    std::cout << "## Mean Tracking Time: " << totalElapsedTime / vElapsedTime.size() << std::endl;
+
+    std::string filepath = "./output/RGB_D/";
+    std::string path = argv[3];
+    size_t lastSlashPos = path.find_last_of('/');
+    std::string extractedPath = path.substr(12, lastSlashPos - 12);
+
+    SLAM.SaveTrajectoryTUM(filepath + extractedPath);
+    SLAM.SaveKeyFrameTrajectoryTUM(filepath + extractedPath);
 
     return 0;
 }
@@ -87,3 +127,41 @@ int main(int argc, char **argv)
  * cv::FileStorage fSettings(argv[2], cv::FileStorage::READ);
  * image.SetResolution(fSettings["Camera.width"], fSettings["Camera.height"], fSettings["Camera.channels"]);
  */
+
+/**
+ * ORB-SLAM2 needs both an rgb and a depth image.
+ * SLAM.TrackRGBD(const cv::Mat &rgb, const cv::Mat &depth, const double &timestamp. )
+ * Time stamp can be arbitrary I believe, thus we can use chrono or simply iterative idx
+ * I believe this is implemented above.
+ */
+
+/**
+ * Below is original working code for reading images, sent to pipe one at a time.
+ * Starting with Depth then RGB
+ * Lines 65-79
+ *
+ */
+// PNGHandler image;
+// image.SetResolution(224, 224, 3);
+// image.type = DEPTH_IMAGE;
+// bytesRead = read(stream.fileDescriptor, tempBuffer, desiredBytes);
+
+// desiredBytes -= bytesRead;
+
+// if (0 == desiredBytes)
+
+// if (DEPTH_IMAGE == image.type)
+// {
+//     image.SetFilename("Custom/depth/" + std::to_string(timestamp) + ".png");
+//     image.type = RGB_IMAGE;
+// }
+// else if (RGB_IMAGE == image.type)
+// {
+//     image.SetFilename("Custom/rgb/" + std::to_string(timestamp) + ".png");
+//     image.type = DEPTH_IMAGE;
+// }
+
+// image.SetImageMatrix(buffer);
+// image.Save();
+// buffer.clear();
+// desiredBytes = image.GetSize();
