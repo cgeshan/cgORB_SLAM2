@@ -1,0 +1,3 @@
+[submodule "cgFastDepth"]
+	path = cgFastDepth
+	url = https://github.com/cgeshan/cgFastDepth.git

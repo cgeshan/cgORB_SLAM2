@@ -7,6 +7,7 @@ PNGHandler::PNGHandler()
     this->channels = 0;
     this->filename = "PNGHandler_Output.png";
     this->dat.resize(width * height * channels);
+    this->img = new cv::Mat(this->width, this->height, CV_8UC3);
 }
 PNGHandler::PNGHandler(const int wid, const int hei, const int channels)
 {
@@ -15,6 +16,7 @@ PNGHandler::PNGHandler(const int wid, const int hei, const int channels)
     this->channels = channels;
     this->filename = "PNGHandler_Output.png";
     this->dat.resize(wid * hei * channels);
+    this->img = new cv::Mat(this->width, this->height, CV_8UC3);
 }
 
 PNGHandler::~PNGHandler()
@@ -28,6 +30,7 @@ void PNGHandler::CleanUp()
     this->height = 0;
     this->channels = 0;
     this->dat.clear();
+    this->img = nullptr;
 }
 
 void PNGHandler::SetResolution(const int wid, const int hei, const int channels)
@@ -41,6 +44,7 @@ void PNGHandler::SetResolution(const int wid, const int hei, const int channels)
     this->height = hei;
     this->channels = channels;
     this->dat.resize(wid * hei * channels);
+    this->img = new cv::Mat(this->width, this->height, CV_8UC3);
 }
 
 void PNGHandler::SetData(const std::vector<char> &buffer)
@@ -49,6 +53,14 @@ void PNGHandler::SetData(const std::vector<char> &buffer)
     {
         this->dat.clear();
         this->dat = buffer;
+    }
+}
+
+void PNGHandler::SetImageMatrixFromVector(const std::vector<char> &imgBuffer)
+{
+    if (!imgBuffer.empty())
+    {
+        std::copy(imgBuffer.begin(), imgBuffer.end(), img->data);
     }
 }
 
@@ -65,18 +77,23 @@ int PNGHandler::GetSize(void) const
     return this->dat.size();
 }
 
+cv::Mat PNGHandler::GetImageMatrix(void) const
+{
+    return *img;
+}
+
 bool PNGHandler::Save()
 {
     if (this->width > 0 && this->height > 0)
     {
-        cv::Mat image(this->width, this->height, CV_8UC3);
+        cv::Mat image(this->height, this->width, CV_8U);
         std::memcpy(image.data, dat.data(), dat.size());
 
         // Convert RGB to BGR
-        cv::Mat bgrImage;
-        cv::cvtColor(image, bgrImage, cv::COLOR_RGB2BGR);
+        // cv::Mat bgrImage;
+        // cv::cvtColor(image, bgrImage, cv::COLOR_RGB2BGR);
 
-        cv::imwrite(this->filename, bgrImage);
+        cv::imwrite(this->filename, image);
 
         std::cout << "Image saved with filename: " << this->filename << std::endl;
         return true;
