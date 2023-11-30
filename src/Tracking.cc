@@ -208,20 +208,26 @@ namespace ORB_SLAM2
         if (mImGray.channels() == 3)
         {
             if (mbRGB)
+            {
                 cvtColor(mImGray, mImGray, CV_RGB2GRAY);
+            }
             else
                 cvtColor(mImGray, mImGray, CV_BGR2GRAY);
         }
         else if (mImGray.channels() == 4)
         {
             if (mbRGB)
+            {
                 cvtColor(mImGray, mImGray, CV_RGBA2GRAY);
+            }
             else
                 cvtColor(mImGray, mImGray, CV_BGRA2GRAY);
         }
 
         if ((fabs(mDepthMapFactor - 1.0f) > 1e-5) || imDepth.type() != CV_32F)
+        {
             imDepth.convertTo(imDepth, CV_32F, mDepthMapFactor);
+        }
 
         mCurrentFrame = Frame(mImGray, imDepth, timestamp, mpORBextractorLeft, mpORBVocabulary, mK, mDistCoef, mbf, mThDepth);
 

@@ -15,11 +15,16 @@ int main(int argc, char **argv)
     stream.SetFileName("Custom/data_stream");
     stream.SetPermission(0666);
 
+<<<<<<< HEAD
     PNGHandler imgRGB, imgDepth;
     imgRGB.SetResolution(224, 224, 3);
     imgDepth.SetResolution(224, 224, 3);
 
     ORB_SLAM2::System SLAM(argv[1], argtv[2], ORB_SLAM2::System::RGBD, true);
+=======
+    PNGHandler imgDepth;
+    imgDepth.SetResolution(640, 480, 1);
+>>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
 
     if (!stream.Init())
     {
@@ -37,9 +42,15 @@ int main(int argc, char **argv)
 
     // Buffer reading
     std::vector<char> buffer;
+<<<<<<< HEAD
     size_t desiredBytes = image.GetSize();
     size_t totalBytes = desiredBytes * 2;
     char tempBuffer[desiredBytes];
+=======
+    size_t totalBytes = imgDepth.GetSize() * 5;
+    char tempBuffer[totalBytes];
+
+>>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
     size_t bytesRead;
 
     // Timing
@@ -47,15 +58,24 @@ int main(int argc, char **argv)
 
     while (!stream.terminate)
     {
+<<<<<<< HEAD
         bytesRead = read(stream.fileDescriptor, tempBuffer, totalBytes);
         buffer.insert(buffer.end(), tempBuffer, tempBuffer + bytesRead);
         totalBytes -= bytesRead;
 
+=======
+
+        bytesRead = read(stream.fileDescriptor, tempBuffer, totalBytes);
+        buffer.insert(buffer.end(), tempBuffer, tempBuffer + bytesRead);
+        totalBytes -= bytesRead;
+
+>>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
         if (0 == totalBytes)
         {
             std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
             std::time_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
 
+<<<<<<< HEAD
             std::cout << "\n## First pair of images received..." << std::endl;
 
             // Split the bytes into respective images
@@ -93,6 +113,17 @@ int main(int argc, char **argv)
 
             double elapsedTime = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
             vElapsedTime.push_back(elapsedTime);
+=======
+            std::vector<char> depthBuffer(buffer.begin(), buffer.end());
+            imgDepth.SetFilename("Custom/depth/" + std::to_string(timestamp) + ".png");
+            imgDepth.SetData(depthBuffer);
+            imgDepth.Save();
+
+            depthBuffer.clear();
+            buffer.clear();
+            totalBytes = imgDepth.GetSize();
+            std::cout << "Exiting saving loop..." << std::endl;
+>>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
         }
 
         std::string bytesStr(tempBuffer, bytesRead);
@@ -128,6 +159,7 @@ int main(int argc, char **argv)
  * image.SetResolution(fSettings["Camera.width"], fSettings["Camera.height"], fSettings["Camera.channels"]);
  */
 
+<<<<<<< HEAD
 /**
  * ORB-SLAM2 needs both an rgb and a depth image.
  * SLAM.TrackRGBD(const cv::Mat &rgb, const cv::Mat &depth, const double &timestamp. )
@@ -165,3 +197,92 @@ int main(int argc, char **argv)
 // image.Save();
 // buffer.clear();
 // desiredBytes = image.GetSize();
+=======
+// Working save RGB image from desk1 dataset
+
+// #include <algorithm>
+// #include <chrono>
+
+// #include <opencv2/core/core.hpp>
+// #include <opencv2/opencv.hpp>
+
+// // #include <System.h>
+
+// #include "DataStream.h"
+// #include "PNGHandler.h"
+
+// int main(int argc, char **argv)
+// {
+//     DataStream stream;
+//     stream.SetFileName("Custom/data_stream");
+//     stream.SetPermission(0666);
+
+//     PNGHandler imgRGB, imgDepth;
+//     imgRGB.SetResolution(640, 480, 3);
+//     imgDepth.SetResolution(640, 480, 3);
+
+//     if (!stream.Init())
+//     {
+//         std::cout << "*** ERROR *** Terminating program, pipe initialization failed." << std::endl;
+//         return 1;
+//     }
+
+//     stream.OpenReadOnly();
+
+//     if (stream.fileDescriptor == -1)
+//     {
+//         std::cerr << "Failed to open the named pipe." << std::endl;
+//         return 1;
+//     }
+
+//     std::vector<char> buffer;
+//     size_t totalBytes = imgDepth.GetSize() + imgRGB.GetSize();
+//     char tempBuffer[totalBytes];
+
+//     size_t bytesRead;
+
+//     while (!stream.terminate)
+//     {
+
+//         bytesRead = read(stream.fileDescriptor, tempBuffer, totalBytes);
+//         buffer.insert(buffer.end(), tempBuffer, tempBuffer + bytesRead);
+//         totalBytes -= bytesRead;
+
+//         if (0 == totalBytes)
+//         {
+//             std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
+//             std::time_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
+
+//             std::vector<char> depthBuffer(buffer.begin(), buffer.begin() + imgDepth.GetSize());
+//             imgDepth.SetFilename("Custom/depth/" + std::to_string(timestamp) + ".png");
+//             imgDepth.SetData(depthBuffer);
+//             imgDepth.Save();
+
+//             std::vector<char> rgbBuffer(buffer.begin() + imgDepth.GetSize(), buffer.end());
+//             imgRGB.SetFilename("Custom/rgb/" + std::to_string(timestamp) + ".png");
+//             imgRGB.SetData(rgbBuffer);
+//             imgRGB.Save();
+
+//             depthBuffer.clear();
+//             rgbBuffer.clear();
+//             buffer.clear();
+//             totalBytes = imgDepth.GetSize() + imgRGB.GetSize();
+//         }
+
+//         std::string bytesStr(tempBuffer, bytesRead);
+
+//         if ("terminate" == bytesStr)
+//         {
+//             stream.terminate = true;
+//             std::cout << "## Terminate command received, closing pipe and exiting data stream loop..." << std::endl;
+//             break;
+//         }
+//     }
+
+//     stream.Close();
+
+//     return 0;
+// }
+
+// Working save depth image from desk1 dataset
+>>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff

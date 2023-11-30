@@ -350,11 +350,12 @@ namespace ORB_SLAM2
         copyStr += "/CameraTrajectory.txt";
         cout << endl
              << "Saving camera trajectory to " << copyStr << " ..." << endl;
-        if (mSensor == MONOCULAR)
-        {
-            cerr << "ERROR: SaveTrajectoryTUM cannot be used for monocular." << endl;
-            return;
-        }
+
+        // if (mSensor == MONOCULAR)
+        // {
+        //     cerr << "ERROR: SaveTrajectoryTUM cannot be used for monocular." << endl;
+        //     return;
+        // }
 
         vector<KeyFrame *> vpKFs = mpMap->GetAllKeyFrames();
         sort(vpKFs.begin(), vpKFs.end(), KeyFrame::lId);
@@ -374,12 +375,11 @@ namespace ORB_SLAM2
         {
 
             ofstream f;
-            f.open(filename.c_str());
+            f.open(copyStr.c_str());
             if (f.is_open())
             {
                 std::cout << "Opened file " << std::endl;
             }
-            cv::waitKey(0);
 
             f << fixed;
 
@@ -420,7 +420,6 @@ namespace ORB_SLAM2
 
                 f << setprecision(6) << *lT << " " << setprecision(9) << twc.at<float>(0) << " " << twc.at<float>(1) << " " << twc.at<float>(2) << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
             }
-            cv::waitKey(0);
             f.close();
             cout << endl
                  << "trajectory saved!" << endl;
