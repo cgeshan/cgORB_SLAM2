@@ -1,58 +1,47 @@
-import open3d as o3d
+from PIL import Image
+
 import numpy as np
-import re
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
+import h5py
+import argparse
+import os
 
 
-# This is special function used for reading NYU pgm format
-# as it is written in big endian byte order.
-def read_nyu_pgm(filename, byteorder=">"):
-    with open(filename, "rb") as f:
-        buffer = f.read()
-    try:
-        header, width, height, maxval = re.search(
-            b"(^P5\s(?:\s*#.*[\r\n])*"
-            b"(\d+)\s(?:\s*#.*[\r\n])*"
-            b"(\d+)\s(?:\s*#.*[\r\n])*"
-            b"(\d+)\s(?:\s*#.*[\r\n]\s)*)",
-            buffer,
-        ).groups()
-    except AttributeError:
-        raise ValueError("Not a raw PGM file: '%s'" % filename)
-    img = np.frombuffer(
-        buffer,
-        dtype=byteorder + "u2",
-        count=int(width) * int(height),
-        offset=len(header),
-    ).reshape((int(height), int(width)))
-    img_out = img.astype("u2")
-    return img_out
+def h5_loader(path):
+    h5f = h5py.File(path, "r")
+    rgb = np.array(h5f["rgb"])
+    rgb = np.transpose(rgb, (1, 2, 0))
+    depth = np.array(h5f["depth"])
+    return rgb, depth
+
+
+def array_to_png(arr, path, img_type):
+    img = Image.fromarray(arr.astype("uint8"))
+    fn = os.path.splitext(os.path.basename(path))[0]
+    save_path = os.path.join(fn, f"{img_type}.png")
+
+    return img, save_path
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--data",
+        metavar="DATA",
+        default="",
+        required=True,
+        help="dataset of images in .h5 format.",
+    )
+
+    args = parser.parse_args()
+
+    for file_path in os.listdir(args.data):
+        rgb_img, depth_img = h5_loader(file_path)
+        img, path = array_to_png(rgb_img, file_path, "rgb")
+        img.save(path)
+
+        img, path = array_to_png(depth_img, file_path, "depth")
+        img.save(path)
 
 
 if __name__ == "__main__":
-    print("Read NYU dataset")
-    # Open3D does not support ppm/pgm file yet. Not using o3d.io.read_image here.
-    # MathplotImage having some ISSUE with NYU pgm file. Not using imread for pgm.
-    color_raw = mpimg.imread("../../TestData/RGBD/other_formats/NYU_color.ppm")
-    depth_raw = read_nyu_pgm("../../TestData/RGBD/other_formats/NYU_depth.pgm")
-    color = o3d.geometry.Image(color_raw)
-    depth = o3d.geometry.Image(depth_raw)
-    rgbd_image = o3d.geometry.create_rgbd_image_from_nyu_format(color, depth)
-    print(rgbd_image)
-    plt.subplot(1, 2, 1)
-    plt.title("NYU grayscale image")
-    plt.imshow(rgbd_image.color)
-    plt.subplot(1, 2, 2)
-    plt.title("NYU depth image")
-    plt.imshow(rgbd_image.depth)
-    plt.show()
-    pcd = o3d.geometry.create_point_cloud_from_rgbd_image(
-        rgbd_image,
-        o3d.camera.PinholeCameraIntrinsic(
-            o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault
-        ),
-    )
-    # Flip it, otherwise the pointcloud will be upside down
-    pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
-    o3d.visualization.draw_geometries([pcd])
+    main()
