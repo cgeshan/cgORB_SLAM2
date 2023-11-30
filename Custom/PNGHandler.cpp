@@ -6,6 +6,8 @@ PNGHandler::PNGHandler()
     this->height = 0;
     this->channels = 0;
     this->filename = "PNGHandler_Output.png";
+    this->dat.resize(width * height * channels);
+    this->img = new cv::Mat(this->width, this->height, CV_8UC3);
 }
 PNGHandler::PNGHandler(const int wid, const int hei, const int channels)
 {
@@ -13,6 +15,8 @@ PNGHandler::PNGHandler(const int wid, const int hei, const int channels)
     this->height = hei;
     this->channels = channels;
     this->filename = "PNGHandler_Output.png";
+    this->dat.resize(wid * hei * channels);
+    this->img = new cv::Mat(this->width, this->height, CV_8UC3);
 }
 
 PNGHandler::~PNGHandler()
@@ -22,11 +26,11 @@ PNGHandler::~PNGHandler()
 
 void PNGHandler::CleanUp()
 {
-    if (nullptr != img)
-    {
-        delete[] img;
-    }
-    img = nullptr;
+    this->width = 0;
+    this->height = 0;
+    this->channels = 0;
+    this->dat.clear();
+    this->img = nullptr;
 }
 
 void PNGHandler::SetResolution(const int wid, const int hei, const int channels)
@@ -39,6 +43,8 @@ void PNGHandler::SetResolution(const int wid, const int hei, const int channels)
     this->width = wid;
     this->height = hei;
     this->channels = channels;
+    this->dat.resize(wid * hei * channels);
+    this->img = new cv::Mat(this->width, this->height, CV_8UC3);
 }
 
 void PNGHandler::SetImageMatrix(const std::vector<char> &buffer)
@@ -58,6 +64,14 @@ void PNGHandler::SetImageMatrix(const std::vector<char> &buffer)
     }
 }
 
+void PNGHandler::SetImageMatrixFromVector(const std::vector<char> &imgBuffer)
+{
+    if (!imgBuffer.empty())
+    {
+        std::copy(imgBuffer.begin(), imgBuffer.end(), img->data);
+    }
+}
+
 void PNGHandler::SetFilename(const std::string &fn)
 {
     if (fn != "" && fn != this->filename)
@@ -71,21 +85,26 @@ int PNGHandler::GetSize(void) const
     return this->width * this->height * this->channels;
 }
 
-bool PNGHandler::Save() const
+cv::Mat PNGHandler::GetImageMatrix(void) const
+{
+    return *img;
+}
+
+bool PNGHandler::Save()
 {
     if (0 < this->width && 0 < this->height && 0 < this->channels)
     {
-        if (nullptr != this->img)
-        {
-            // Convert RGB to BGR
-            cv::Mat bgrImage;
-            cv::cvtColor(this->img, bgrImage, cv::COLOR_RGB2BGR);
+        cv::Mat image(this->height, this->width, CV_8U);
+        std::memcpy(image.data, dat.data(), dat.size());
 
-            cv::imwrite(this->filename, bgrImage);
+        // Convert RGB to BGR
+        // cv::Mat bgrImage;
+        // cv::cvtColor(image, bgrImage, cv::COLOR_RGB2BGR);
 
-            std::cout << "Image saved with filename: " << this->filename << std::endl;
-            return true;
-        }
+        cv::imwrite(this->filename, image);
+
+        std::cout << "Image saved with filename: " << this->filename << std::endl;
+        return true;
     }
     else
     {

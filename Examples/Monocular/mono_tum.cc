@@ -129,6 +129,7 @@ int main(int argc, char **argv)
     std::string extractedPath = path.substr(12, lastSlashPos - 12);
 
     SLAM.SaveKeyFrameTrajectoryTUM(filepath + extractedPath);
+    SLAM.SaveTrajectoryTUM(filepath + extractedPath);
 
     return 0;
 }
