@@ -12,15 +12,21 @@ class PNGHandler
 {
 private:
 <<<<<<< HEAD
+<<<<<<< HEAD
     int width = 0, height = 0, channels = 0;
     cv::Mat *img = nullptr;
     std::string filename = "";
 =======
+=======
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
     int width, height, channels;
     std::vector<char> dat;
     std::string filename;
     cv::Mat *img = nullptr;
+<<<<<<< HEAD
 >>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
+=======
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
 
 public:
     PNGHandler();
@@ -28,6 +34,7 @@ public:
     ~PNGHandler();
     void CleanUp();
     void SetResolution(const int wid, const int hei, const int channels);
+<<<<<<< HEAD
 <<<<<<< HEAD
     void SetImageMatrix(const std::vector<char> &buffer);
     void SetFilename(const std::string &fn);
@@ -37,13 +44,18 @@ public:
     ImageType type;
 =======
     void SetData(const std::vector<char> &buffer);
+=======
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
     void SetImageMatrixFromVector(const std::vector<char> &imgBuffer);
     void SetFilename(const std::string &fn);
     int GetSize(void) const;
     cv::Mat GetImageMatrix(void) const;
     bool Save();
+<<<<<<< HEAD
     void Print();
 >>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
+=======
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
 };
 
 #endif

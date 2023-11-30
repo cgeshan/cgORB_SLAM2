@@ -59,10 +59,17 @@ int main(int argc, char **argv)
     while (!stream.terminate)
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+
+>>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
         bytesRead = read(stream.fileDescriptor, tempBuffer, totalBytes);
         buffer.insert(buffer.end(), tempBuffer, tempBuffer + bytesRead);
         totalBytes -= bytesRead;
 
+<<<<<<< HEAD
 =======
 
         bytesRead = read(stream.fileDescriptor, tempBuffer, totalBytes);
@@ -70,6 +77,8 @@ int main(int argc, char **argv)
         totalBytes -= bytesRead;
 
 >>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
+=======
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
         if (0 == totalBytes)
         {
             std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();

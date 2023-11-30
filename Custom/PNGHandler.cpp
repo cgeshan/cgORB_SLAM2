@@ -7,10 +7,15 @@ PNGHandler::PNGHandler()
     this->channels = 0;
     this->filename = "PNGHandler_Output.png";
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     this->dat.resize(width * height * channels);
     this->img = new cv::Mat(this->width, this->height, CV_8UC3);
 >>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
+=======
+    this->dat.resize(width * height * channels);
+    this->img = new cv::Mat(this->width, this->height, CV_8UC3);
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
 }
 PNGHandler::PNGHandler(const int wid, const int hei, const int channels)
 {
@@ -19,10 +24,15 @@ PNGHandler::PNGHandler(const int wid, const int hei, const int channels)
     this->channels = channels;
     this->filename = "PNGHandler_Output.png";
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     this->dat.resize(wid * hei * channels);
     this->img = new cv::Mat(this->width, this->height, CV_8UC3);
 >>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
+=======
+    this->dat.resize(wid * hei * channels);
+    this->img = new cv::Mat(this->width, this->height, CV_8UC3);
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
 }
 
 PNGHandler::~PNGHandler()
@@ -33,18 +43,24 @@ PNGHandler::~PNGHandler()
 void PNGHandler::CleanUp()
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (nullptr != img)
     {
         delete[] img;
     }
     img = nullptr;
 =======
+=======
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
     this->width = 0;
     this->height = 0;
     this->channels = 0;
     this->dat.clear();
     this->img = nullptr;
+<<<<<<< HEAD
 >>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
+=======
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
 }
 
 void PNGHandler::SetResolution(const int wid, const int hei, const int channels)
@@ -58,10 +74,15 @@ void PNGHandler::SetResolution(const int wid, const int hei, const int channels)
     this->height = hei;
     this->channels = channels;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     this->dat.resize(wid * hei * channels);
     this->img = new cv::Mat(this->width, this->height, CV_8UC3);
 >>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
+=======
+    this->dat.resize(wid * hei * channels);
+    this->img = new cv::Mat(this->width, this->height, CV_8UC3);
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
 }
 
 void PNGHandler::SetImageMatrix(const std::vector<char> &buffer)
@@ -103,14 +124,18 @@ int PNGHandler::GetSize(void) const
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 bool PNGHandler::Save() const
 =======
+=======
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
 cv::Mat PNGHandler::GetImageMatrix(void) const
 {
     return *img;
 }
 
 bool PNGHandler::Save()
+<<<<<<< HEAD
 >>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
 {
     if (0 < this->width && 0 < this->height && 0 < this->channels)
@@ -128,6 +153,11 @@ bool PNGHandler::Save()
             return true;
         }
 =======
+=======
+{
+    if (0 < this->width && 0 < this->height && 0 < this->channels)
+    {
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
         cv::Mat image(this->height, this->width, CV_8U);
         std::memcpy(image.data, dat.data(), dat.size());
 
@@ -139,7 +169,10 @@ bool PNGHandler::Save()
 
         std::cout << "Image saved with filename: " << this->filename << std::endl;
         return true;
+<<<<<<< HEAD
 >>>>>>> 9b788acf309b6c08670892108cfcdf168eef2bff
+=======
+>>>>>>> 3321a883e5651259f82ccb4e61777865cd3842e7
     }
     else
     {
