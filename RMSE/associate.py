@@ -134,6 +134,11 @@ if __name__ == "__main__":
         help="maximally allowed time difference for matching entries (default: 0.02)",
         default=0.02,
     )
+    parser.add_argument(
+        "--save",
+        help="output file to write the results (default: output.txt)",
+        default="output.txt",
+    )
     args = parser.parse_args()
 
     first_list = read_file_list(args.first_file)
@@ -143,17 +148,18 @@ if __name__ == "__main__":
         first_list, second_list, float(args.offset), float(args.max_difference)
     )
 
-    if args.first_only:
-        for a, b in matches:
-            print("%f %s" % (a, " ".join(first_list[a])))
-    else:
-        for a, b in matches:
-            print(
-                "%f %s %f %s"
-                % (
-                    a,
-                    " ".join(first_list[a]),
-                    b - float(args.offset),
-                    " ".join(second_list[b]),
+    with open(args.save, "w") as output_file:
+        if args.first_only:
+            for a, b in matches:
+                output_file.write("%f %s\n" % (a, " ".join(first_list[a])))
+        else:
+            for a, b in matches:
+                output_file.write(
+                    "%f %s %f %s\n"
+                    % (
+                        a,
+                        " ".join(first_list[a]),
+                        b - float(args.offset),
+                        " ".join(second_list[b]),
+                    )
                 )
-            )
