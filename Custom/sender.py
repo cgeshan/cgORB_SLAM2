@@ -12,7 +12,7 @@ if not os.path.exists(fifo_path):
 with open(fifo_path, "wb") as fifo:
     for _ in range(3):
         img2 = Image.open(
-            "/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/sequences/rgbd_dataset_freiburg2_xyz/rgb/1311867170.462290.png"
+            "/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/cgFastDepth/depth_preds/rgb.png"
         )
 
         rgb_arr2 = np.array(img2)
@@ -21,7 +21,7 @@ with open(fifo_path, "wb") as fifo:
         print(rgb_arr2.shape)
 
         img3 = Image.open(
-            "/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/sequences/rgbd_dataset_freiburg2_xyz/depth_preds/1311867170.462290.png"
+            "/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/cgFastDepth/depth_preds/rgb_pred.png"
         )
 
         rgb_arr3 = np.array(img3)
