@@ -124,7 +124,7 @@ int main(int argc, char **argv)
     }
 
     // Pause for screenshot and report purposes
-    cv::waitKey(0);
+    // cv::waitKey(0);
     // Stop all threads
     SLAM.Shutdown();
 

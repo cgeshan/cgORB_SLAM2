@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <chrono>
+#include <tiffio.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
@@ -11,21 +12,34 @@
 
 int main(int argc, char **argv)
 {
+    if (argc != 3)
+    {
+        cerr << endl
+             << "* Improper Usage * ./Custom path_to_vocabulary path_to_camera_settings" << endl;
+        return 1;
+    }
+
+    // Create SLAM system. It initializes all system threads and gets ready to process frames.
+    ORB_SLAM2::System SLAM(argv[1], argv[2], ORB_SLAM2::System::RGBD, true);
+
+    std::cout << "\n\n## SLAM system initialized... " << std::endl;
+
     DataStream stream;
     stream.SetFileName("Custom/data_stream");
     stream.SetPermission(0666);
 
     const std::string strSettingsFile = argv[2];
-    cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
+    cv::FileStorage fsSettings(strSettingsFile, cv::FileStorage::READ);
     if (!fsSettings.isOpened())
     {
         cerr << "Failed to open settings file at: " << strSettingsFile << endl;
         exit(-1);
     }
 
-    PNGHandler imgDepth;
+    PNGHandler imgRGB, imgDepth;
     // Get the camera resolution from the yaml settings file.cv::FileStorage fSettings(argv[2], cv::FileStorage::READ);
-    imgDepth.SetResolution(fsSettings["Camera.width"], fsSettings["Camera.height"], fsSettings["Camera.channels"]);
+    imgRGB.SetResolution(fsSettings["Camera.width"], fsSettings["Camera.height"], fsSettings["Camera.channels"], CV_8UC3);
+    imgDepth.SetResolution(fsSettings["Camera.width"], fsSettings["Camera.height"], 1, CV_8UC1);
 
     if (!stream.Init())
     {
@@ -33,6 +47,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    std::cout << "## Plead run cgFastDepth/online.py for online SLAM using FastDepth estimation..." << std::endl;
     stream.OpenReadOnly();
 
     if (stream.fileDescriptor == -1)
@@ -43,13 +58,9 @@ int main(int argc, char **argv)
 
     // Buffer reading
     std::vector<char> buffer;
-    size_t totalBytes = imgDepth.GetSize() * 5;
+    size_t totalBytes = imgRGB.GetSize() + imgDepth.GetSize();
     char tempBuffer[totalBytes];
-
     size_t bytesRead;
-
-    // Timing
-    std::vector<float> vElapsedTime;
 
     while (!stream.terminate)
     {
@@ -57,23 +68,30 @@ int main(int argc, char **argv)
         buffer.insert(buffer.end(), tempBuffer, tempBuffer + bytesRead);
         totalBytes -= bytesRead;
 
-        bytesRead = read(stream.fileDescriptor, tempBuffer, totalBytes);
-        buffer.insert(buffer.end(), tempBuffer, tempBuffer + bytesRead);
-        totalBytes -= bytesRead;
         if (0 == totalBytes)
         {
             std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
             std::time_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime.time_since_epoch()).count();
 
-            std::vector<char> depthBuffer(buffer.begin(), buffer.end());
-            imgDepth.SetFilename("Custom/depth/" + std::to_string(timestamp) + ".png");
-            imgDepth.SetImageMatrixFromVector(depthBuffer);
-            imgDepth.Save();
+            std::vector<char> rgbBuffer(buffer.begin(), buffer.begin() + imgRGB.GetSize());
+            imgRGB.SetImageMatrixFromVector(rgbBuffer);
 
+            std::vector<char> depthBuffer(buffer.begin() + imgRGB.GetSize(), buffer.end());
+            imgDepth.SetImageMatrixFromVector(depthBuffer);
+
+            // // If you would like to save the files
+            // imgRGB.SetFilename("Custom/rgb/" + std::to_string(timestamp) + ".png");
+            // imgRGB.Save();
+            // imgDepth.SetFilename("Custom/depth/" + std::to_string(timestamp) + ".png");
+            // imgDepth.Save();
+
+            // Pass the image to the SLAM system
+            SLAM.TrackRGBD(imgRGB.GetImageMatrix(), imgDepth.GetImageMatrix(), timestamp);
+
+            rgbBuffer.clear();
             depthBuffer.clear();
             buffer.clear();
-            totalBytes = imgDepth.GetSize();
-            std::cout << "Exiting saving loop..." << std::endl;
+            totalBytes = imgRGB.GetSize() + imgDepth.GetSize();
         }
 
         std::string bytesStr(tempBuffer, bytesRead);
@@ -85,20 +103,8 @@ int main(int argc, char **argv)
             break;
         }
     }
-    // SLAM.Shutdown();
+    SLAM.Shutdown();
     stream.Close();
-
-    // float totalElapsedTime = std::accumulate(vElapsedTime.begin(), vElapsedTime.end(), 0);
-    // std::cout << "\n## Median Tracking Time: " << vElapsedTime[vElapsedTime.size() / 2] << std::endl;
-    // std::cout << "## Mean Tracking Time: " << totalElapsedTime / vElapsedTime.size() << std::endl;
-
-    // std::string filepath = "./output/RGB_D/";
-    // std::string path = argv[3];
-    // size_t lastSlashPos = path.find_last_of('/');
-    // std::string extractedPath = path.substr(12, lastSlashPos - 12);
-
-    // SLAM.SaveTrajectoryTUM(filepath + extractedPath);
-    // SLAM.SaveKeyFrameTrajectoryTUM(filepath + extractedPath);
 
     return 0;
 }

@@ -13,15 +13,15 @@ class PNGHandler
 private:
     int width = 0, height = 0, channels = 0;
     std::string filename = "";
-    std::vector<char> dat;
+    std::vector<char> dat = {};
     cv::Mat *img = nullptr;
 
 public:
     PNGHandler();
-    PNGHandler(const int wid, const int hei, const int channels);
+    PNGHandler(const int wid, const int hei, const int channels, int cvType);
     ~PNGHandler();
     void CleanUp();
-    void SetResolution(const int wid, const int hei, const int channels);
+    void SetResolution(const int wid, const int hei, const int channels, int cvType);
     void SetImageMatrixFromVector(const std::vector<char> &buffer);
     void SetFilename(const std::string &fn);
     int GetSize(void) const;

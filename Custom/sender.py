@@ -11,23 +11,24 @@ if not os.path.exists(fifo_path):
 
 with open(fifo_path, "wb") as fifo:
     for _ in range(3):
-        img = Image.open(
-            "/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/sequences/rgbd_dataset_freiburg1_desk/depth/1305031453.374112.png"
+        img2 = Image.open(
+            "/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/sequences/rgbd_dataset_freiburg2_xyz/rgb/1311867170.462290.png"
         )
 
-        rgb_arr = np.array(img)
-        print(rgb_arr)
-        fifo.write(rgb_arr.tobytes())
-        print("GT Sent")
-        # time.sleep(2)
+        rgb_arr2 = np.array(img2)
+        fifo.write(rgb_arr2.tobytes())
+        print("RGB Sent")
+        print(rgb_arr2.shape)
 
-        # img2 = Image.open(
-        #     "/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/sequences/rgbd_dataset_freiburg1_desk/rgb/1305031452.791720.png"
-        # )
+        img3 = Image.open(
+            "/home/cgeshan/Desktop/CMU/F23/cgORB_SLAM2/sequences/rgbd_dataset_freiburg2_xyz/depth_preds/1311867170.462290.png"
+        )
 
-        # rgb_arr2 = np.array(img2)
-        # fifo.write(rgb_arr2.tobytes())
-        # print("Pred Sent")
+        rgb_arr3 = np.array(img3)
+        fifo.write(rgb_arr3.tobytes())
+        print("depth Sent")
+
+        # time.sleep(5)
 
     terminate_signal = "terminate"
     fifo.write(terminate_signal.encode("utf-8"))
