@@ -61,6 +61,9 @@ int main(int argc, char **argv)
     cout << "Images in the sequence: " << nImages << endl
          << endl;
 
+    // Tracking runtime of live vs offline
+    auto start = std::chrono::high_resolution_clock::now();
+
     // Main loop
     cv::Mat im;
     for (int ni = 0; ni < nImages; ni++)
@@ -106,6 +109,10 @@ int main(int argc, char **argv)
         if (ttrack < T)
             usleep((T - ttrack) * 1e6);
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+    std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
 
     // Stop all threads
     SLAM.Shutdown();
