@@ -10,22 +10,24 @@
 #include "DataStream.h"
 #include "PNGHandler.h"
 
-void LoadTimeStamps(const string &strFile, vector<double> &vTimestamps)
+void LoadTimeStamps(const string &strFile, vector<double> &timestamps)
 {
-    ifstream f;
+    std::ifstream f;
     f.open(strFile.c_str());
 
     while (!f.eof())
     {
-        string s;
-        getline(f, s);
+        std::string s;
+        std::getline(f, s);
         if (!s.empty())
         {
-            stringstream ss;
+            std::stringstream ss;
             ss << s;
             double t;
             ss >> t;
-            vTimestamps.push_back(t);
+
+            // Adjust this based on format of timestamps (t) for TUM datasets
+            timestamps.push_back(t);
         }
     }
 }
@@ -34,21 +36,21 @@ int main(int argc, char **argv)
 {
     if (argc != 4)
     {
-        cerr << endl
-             << "* Improper Usage * ./Custom path_to_vocabulary path_to_camera_settings path_to_txt" << endl;
+        std::cerr << std::endl
+                  << "* Improper Usage * ./Custom path_to_vocabulary path_to_camera_settings path_to_txt" << endl;
         return 1;
     }
 
-    vector<double> vTimestamps;
-    string strFile = string(argv[3]) + "/timestamps.txt";
-    LoadTimeStamps(strFile, vTimestamps);
-    int nImages = vTimestamps.size();
+    std::vector<double> timestamps;
+    std::string strFile = std::string(argv[3]) + "/timestamps.txt";
+    LoadTimeStamps(strFile, timestamps);
+    int numImages = timestamps.size();
 
-    // Create SLAM system. It initializes all system threads and gets ready to process frames.
+    // Create SLAM system.
     ORB_SLAM2::System SLAM(argv[1], argv[2], ORB_SLAM2::System::RGBD, true);
+    std::cout << "\n## SLAM system initialized... " << std::endl;
 
-    std::cout << "\n\n## SLAM system initialized... " << std::endl;
-
+    // Create named pipe for data stream
     DataStream stream;
     stream.SetFileName("Custom/data_stream");
     stream.SetPermission(0666);
@@ -57,8 +59,8 @@ int main(int argc, char **argv)
     cv::FileStorage fsSettings(strSettingsFile, cv::FileStorage::READ);
     if (!fsSettings.isOpened())
     {
-        cerr << "Failed to open settings file at: " << strSettingsFile << endl;
-        exit(-1);
+        std::cerr << "Failed to open settings file at: " << strSettingsFile << std::endl;
+        return 2;
     }
 
     PNGHandler imgRGB, imgDepth;
@@ -68,8 +70,18 @@ int main(int argc, char **argv)
 
     if (!stream.Init())
     {
-        std::cout << "*** ERROR *** Terminating program, pipe initialization failed." << std::endl;
-        return 1;
+        std::cout << "*** ERROR *** Failed to initialize pipe." << std::endl;
+        try
+        {
+            stream.Close();
+            std::cout << "## Closed hanging pipe, attempting to re-initialize..." << std::endl;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << '\n';
+            std::cout << "*** ERROR *** Terminating program, pipe initialization failed." << std::endl;
+            return 1;
+        }
     }
 
     std::cout << "## Please run cgFastDepth/online.py for online SLAM using FastDepth estimation..." << std::endl;
@@ -77,20 +89,22 @@ int main(int argc, char **argv)
 
     if (stream.fileDescriptor == -1)
     {
-        std::cerr << "Failed to open the named pipe." << std::endl;
+        std::cerr << "*** ERROR *** Failed to open the named pipe." << std::endl;
         return 1;
     }
 
+    std::cout << std::endl;
+
     // Tracking runtime of live vs offline
-    vector<float> vTimesTrack;
-    vTimesTrack.resize(nImages);
+    std::vector<float> trackingTimes;
+    trackingTimes.resize(numImages);
     int i = 0;
-    auto start = std::chrono::high_resolution_clock::now();
+    auto t0 = std::chrono::steady_clock::now();
 
     // Buffer reading
     std::vector<char> buffer;
     size_t totalBytes = imgRGB.GetSize() + (sizeof(float) * imgDepth.GetSize());
-    char tempBuffer[totalBytes];
+    char *tempBuffer = new char[totalBytes];
     size_t bytesRead;
 
     while (!stream.terminate)
@@ -103,7 +117,7 @@ int main(int argc, char **argv)
         {
             if (0 == i)
             {
-                start = std::chrono::high_resolution_clock::now();
+                t0 = std::chrono::steady_clock::now();
             }
 
             std::vector<char> rgbBuffer(buffer.begin(), buffer.begin() + imgRGB.GetSize());
@@ -120,41 +134,40 @@ int main(int argc, char **argv)
             // imgDepth.SetFilename("Custom/depth/" + std::to_string(timestamp) + ".tiff");
             // imgDepth.Save();
 
-            double tframe = vTimestamps[i];
+            double trackedFrame = timestamps[i];
 
-#ifdef COMPILEDWITHC11
-            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-#else
-            std::chrono::monotonic_clock::time_point t1 = std::chrono::monotonic_clock::now();
-#endif
+            auto t1 = std::chrono::steady_clock::now();
 
             // Pass the image to the SLAM system
-            SLAM.TrackRGBD(imgRGB.GetImageMatrix(), imgDepth.GetImageMatrix(), tframe);
+            SLAM.TrackRGBD(imgRGB.GetImageMatrix(), imgDepth.GetImageMatrix(), trackedFrame);
 
-#ifdef COMPILEDWITHC11
-            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
-#else
-            std::chrono::monotonic_clock::time_point t2 = std::chrono::monotonic_clock::now();
-#endif
+            auto t2 = std::chrono::steady_clock::now();
 
             rgbBuffer.clear();
             depthBuffer.clear();
             buffer.clear();
             totalBytes = imgRGB.GetSize() + (sizeof(float) * imgDepth.GetSize());
 
-            double ttrack = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
+            double trackTime = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1).count();
 
-            vTimesTrack[i] = ttrack;
+            trackingTimes[i] = trackTime;
 
             // Wait to load the next frame
             double T = 0;
-            if (i < nImages - 1)
-                T = vTimestamps[i + 1] - tframe;
+            if (i < numImages - 1)
+            {
+                T = timestamps[i + 1] - trackedFrame;
+            }
             else if (i > 0)
-                T = tframe - vTimestamps[i - 1];
+            {
+                T = trackedFrame - timestamps[i - 1];
+            }
 
-            if (ttrack < T)
-                usleep((T - ttrack) * 1e-5);
+            if (trackTime < T)
+            {
+                // Adjust this based on format of timestamps (use 1e-5 for TUM datasets)
+                usleep((T - trackTime) * 1e-1);
+            }
 
             ++i;
         }
@@ -169,27 +182,28 @@ int main(int argc, char **argv)
         }
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-    std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
+    auto tEnd = std::chrono::steady_clock::now();
+    auto runtime = std::chrono::duration_cast<std::chrono::duration<double>>(tEnd - t0).count();
 
     SLAM.Shutdown();
     stream.Close();
 
     // Tracking time statistics
-    sort(vTimesTrack.begin(), vTimesTrack.end());
+    sort(trackingTimes.begin(), trackingTimes.end());
     float totaltime = 0;
-    for (int ni = 0; ni < nImages; ni++)
+    for (int i = 0; i < numImages; i++)
     {
-        totaltime += vTimesTrack[ni];
+        totaltime += trackingTimes[i];
     }
-    cout << "-------" << endl
-         << endl;
-    cout << "median tracking time: " << vTimesTrack[nImages / 2] << endl;
-    cout << "mean tracking time: " << totaltime / nImages << endl;
+
+    // Print time stats
+    std::cout << "\n----- Timing Statistics -----" << std::endl;
+    std::cout << "   Median Tracking Time (seconds): " << trackingTimes[numImages / 2] << std::endl;
+    std::cout << "   Mean Tracking Time (seconds): " << totaltime / numImages << std::endl;
+    std::cout << "   Execution Time (seconds): " << runtime << std::endl;
 
     // Save camera trajectory
-    std::string filepath = "./output/RGB_D/";
+    std::string filepath = "./output/FD_Estimated/";
     std::string path = argv[3];
     size_t lastSlashPos = path.find_last_of('/');
     std::string extractedPath = path.substr(12, lastSlashPos - 12);
