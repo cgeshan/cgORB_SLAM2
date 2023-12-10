@@ -166,7 +166,7 @@ int main(int argc, char **argv)
             if (trackTime < T)
             {
                 // Adjust this based on format of timestamps (use 1e-5 for TUM datasets)
-                usleep((T - trackTime) * 1e-1);
+                usleep((T - trackTime) * 1e-5);
             }
 
             ++i;
